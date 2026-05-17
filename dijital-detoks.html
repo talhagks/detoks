@@ -513,8 +513,20 @@
 <!-- UYGULAMALAR SAYFASI -->
 <div class="page" id="page-apps">
   <div class="section-title">Zaman Hırsızları</div>
-  <div class="section-sub">Hangi uygulamaların seni en çok emdiğini gör — engelle veya serbest bırak.</div>
-  
+  <div class="section-sub">Uygulama veya website ekle — engelle veya serbest bırak.</div>
+
+  <!-- EKLE SATIRLARI -->
+  <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+    <input class="goal-input" id="newAppName" placeholder="Uygulama adı (örn: BeReal)" style="flex:1;min-width:120px;">
+    <input class="goal-input" id="newAppIcon" placeholder="Emoji 📸" style="width:80px;text-align:center;">
+    <button class="btn-add" onclick="addCustomApp()">+ Uygulama Ekle</button>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;">
+    <input class="goal-input" id="newSiteName" placeholder="Site adı (örn: Twitter)" style="flex:1;min-width:120px;">
+    <input class="goal-input" id="newSiteUrl" placeholder="URL (örn: twitter.com)" style="flex:1;min-width:140px;">
+    <button class="btn-add" onclick="addCustomSite()">+ Site Ekle</button>
+  </div>
+
   <div class="apps-grid" id="appsGrid"></div>
 </div>
 
@@ -714,15 +726,19 @@ function nextQuote() {
 // --- APPS ---
 function renderApps() {
   const grid = document.getElementById('appsGrid');
-  const max = Math.max(...state.apps.map(a => a.minutes));
+  const max = Math.max(...state.apps.map(a => a.minutes), 1);
   grid.innerHTML = state.apps.map((app, i) => `
-    <div class="app-card ${app.blocked ? 'blocked' : ''}" onclick="toggleBlock(${i})">
+    <div class="app-card ${app.blocked ? 'blocked' : ''}" style="position:relative;">
+      <button onclick="deleteApp(${i})" style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;z-index:2;" title="Sil">×</button>
       <div class="app-icon">${app.icon}</div>
       <div class="app-name">${app.name}</div>
-      <div class="app-time">Bugün: ${app.time}</div>
+      ${app.url ? `<div class="app-time" style="color:var(--accent);font-size:11px;">🌐 ${app.url}</div>` : `<div class="app-time">Bugün: ${app.time}</div>`}
       <div class="app-bar-wrap">
         <div class="app-bar" style="width:${(app.minutes/max*100).toFixed(0)}%; background:${app.blocked ? 'var(--danger)' : 'var(--accent)'}"></div>
       </div>
+      <button onclick="toggleBlock(${i})" style="margin-top:12px;width:100%;padding:8px;border-radius:8px;border:1px solid ${app.blocked ? 'var(--danger)' : 'var(--border)'};background:${app.blocked ? 'rgba(255,68,68,0.1)' : 'transparent'};color:${app.blocked ? 'var(--danger)' : 'var(--muted)'};font-size:12px;cursor:pointer;font-family:inherit;">
+        ${app.blocked ? '🚫 Engellendi — Kaldır' : '🔒 Engelle'}
+      </button>
     </div>
   `).join('');
 }
@@ -730,6 +746,35 @@ function renderApps() {
 function toggleBlock(i) {
   state.apps[i].blocked = !state.apps[i].blocked;
   localStorage.setItem('detoks_apps', JSON.stringify(state.apps));
+  renderApps();
+}
+
+function deleteApp(i) {
+  state.apps.splice(i, 1);
+  localStorage.setItem('detoks_apps', JSON.stringify(state.apps));
+  renderApps();
+}
+
+function addCustomApp() {
+  const name = document.getElementById('newAppName').value.trim();
+  const icon = document.getElementById('newAppIcon').value.trim() || '📱';
+  if (!name) return;
+  state.apps.push({ name, icon, time: '0s 0dk', minutes: 0, blocked: false });
+  localStorage.setItem('detoks_apps', JSON.stringify(state.apps));
+  document.getElementById('newAppName').value = '';
+  document.getElementById('newAppIcon').value = '';
+  renderApps();
+}
+
+function addCustomSite() {
+  const name = document.getElementById('newSiteName').value.trim();
+  let url = document.getElementById('newSiteUrl').value.trim();
+  if (!name) return;
+  if (url && !url.startsWith('http')) url = 'https://' + url;
+  state.apps.push({ name, icon: '🌐', time: '0s 0dk', minutes: 0, blocked: false, url: url.replace('https://','').replace('http://','') });
+  localStorage.setItem('detoks_apps', JSON.stringify(state.apps));
+  document.getElementById('newSiteName').value = '';
+  document.getElementById('newSiteUrl').value = '';
   renderApps();
 }
 
