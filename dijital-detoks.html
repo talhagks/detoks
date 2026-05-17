@@ -151,3 +151,125 @@
     <div class="now-playing">▶ Şu An Oynatılıyor</div>
     <button class="close-player" onclick="closePlayer()">✕ Kapat</button>
   </div>
+  <div class="player-title" id="playerTitle"></div>
+
+  <div class="volume-bar">
+    <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+    <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="50" oninput="setVolume(this.value)">
+    <span class="vol-num" id="volNum">50</span>
+  </div>
+
+  <div class="iframe-wrap">
+    <div class="tap-zone tap-zone-left" id="tapLeft"></div>
+    <div class="tap-zone tap-zone-right" id="tapRight"></div>
+    <div class="seek-flash left" id="flashLeft"><div class="seek-arrow">«</div><div>-10sn</div></div>
+    <div class="seek-flash right" id="flashRight"><div class="seek-arrow">»</div><div>+10sn</div></div>
+    <div id="player"></div>
+  </div>
+</div>
+
+<div class="list-wrap">
+  <div class="list-title">Video Listem</div>
+  <div id="emptyState" class="empty-state">
+    <div class="empty-icon">🎬</div>
+    <div class="empty-text">Henüz video yok.<br>YouTube'dan bir URL yapıştır og ekle.</div>
+  </div>
+  <div class="video-list" id="videoList"></div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let videos = JSON.parse(localStorage.getItem('temizyt_videos') || '[]');
+let currentIdx = -1;
+let ytPlayer = null;
+let ytReady = false;
+let pendingVideoId = null;
+let isMuted = false;
+let lastVolume = 50;
+
+window.onYouTubeIframeAPIReady = function() {
+  ytReady = true;
+  ytPlayer = new YT.Player('player', {
+    height: '100%',
+    width: '100%',
+    // HESAP ÇAKIŞMALARINI VE REKLAMLARI ÖNLEMEK İÇİN REKLAMSIZ DOMAIN ETİKETLENDİ
+    host: 'https://www.youtube-nocookie.com',
+    playerVars: { rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 1, playsinline: 0 },
+    events: {
+      onReady: function(e) {
+        const iframe = document.querySelector('#player iframe');
+        if (iframe) {
+          iframe.setAttribute('allowfullscreen', '');
+          iframe.setAttribute('webkitallowfullscreen', '');
+        }
+        applyCurrentVolume();
+        if (pendingVideoId) {
+          e.target.loadVideoById(pendingVideoId);
+          pendingVideoId = null;
+        }
+      },
+      onStateChange: function(e) {
+        if (e.data === YT.PlayerState.PLAYING) {
+          applyCurrentVolume();
+        }
+      }
+    }
+  });
+};
+
+// URL AYIKLAMA SİSTEMİ GÜÇLENDİRİLDİ
+function extractVideoId(url) {
+  url = url.trim();
+  if (!url) return null;
+  
+  // Tüm modern mobil, web, shorts ve parametreli paylaşımları kapsayan gelişmiş regex düzeni
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  
+  if (match && match[2].length === 11) {
+    return match[2];
+  }
+  
+  // Eğer kullanıcı sadece direkt 11 haneli ID yapıştırdıysa koru
+  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
+    return url;
+  }
+  return null;
+}
+
+function addVideo() {
+  const url = document.getElementById('urlInput').value.trim();
+  const title = document.getElementById('titleInput').value.trim();
+  const err = document.getElementById('errorMsg');
+  const id = extractVideoId(url);
+  
+  if (!id) { 
+    err.classList.add('show'); 
+    setTimeout(() => err.classList.remove('show'), 3000); 
+    return; 
+  }
+  
+  err.classList.remove('show');
+  videos.push({ id, name: title || 'Video ' + (videos.length + 1), url });
+  save();
+  document.getElementById('urlInput').value = '';
+  document.getElementById('titleInput').value = '';
+  render();
+}
+
+function playVideo(idx) {
+  currentIdx = idx;
+  const v = videos[idx];
+  document.getElementById('playerTitle').textContent = v.name;
+  document.getElementById('playerWrap').classList.add('show');
+  if (ytPlayer && ytReady && typeof ytPlayer.loadVideoById === 'function') {
+    ytPlayer.loadVideoById(v.id);
+  } else {
+    pendingVideoId = v.id;
+  }
+  setTimeout(() => document.getElementById('playerWrap').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  render();
+}
+
+function closePlayer() {
+  if (ytPlayer
