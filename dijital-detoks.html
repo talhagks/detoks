@@ -7,13 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --border: #222;
-    --accent: #ff3b3b;
-    --text: #f5f5f5;
-    --muted: #555;
-    --card: #1a1a1a;
+    --bg: #0a0a0a; --surface: #141414; --border: #222;
+    --accent: #ff3b3b; --text: #f5f5f5; --muted: #555; --card: #1a1a1a;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
@@ -29,40 +24,55 @@
   .video-count { background: var(--surface); border: 1px solid var(--border); border-radius: 50px; padding: 6px 16px; font-size: 13px; color: var(--muted); }
   .video-count span { color: var(--text); font-weight: 500; }
 
-  .add-bar { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+  .add-bar { padding: 24px 32px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .url-input, .title-input {
     background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
     padding: 12px 18px; color: var(--text); font-family: 'DM Sans', sans-serif;
     font-size: 14px; outline: none; transition: border-color 0.2s;
   }
-  .url-input { flex: 1; }
+  .url-input { flex: 1; min-width: 200px; }
   .title-input { width: 200px; }
   .url-input:focus, .title-input:focus { border-color: var(--accent); }
   .url-input::placeholder, .title-input::placeholder { color: var(--muted); }
   .add-btn {
     background: var(--accent); color: #fff; border: none; border-radius: 10px;
     padding: 12px 24px; font-family: 'DM Sans', sans-serif; font-size: 14px;
-    font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+    font-weight: 500; cursor: pointer; white-space: nowrap;
   }
-  .add-btn:hover { opacity: 0.85; }
-  .error-msg { display: none; color: var(--accent); font-size: 13px; padding: 8px 32px; }
+  .error-msg { display: none; color: var(--accent); font-size: 13px; padding: 6px 32px; }
   .error-msg.show { display: block; }
 
+  /* PLAYER */
   .player-wrap { display: none; padding: 24px 32px 0; }
   .player-wrap.show { display: block; }
-  .player-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .player-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .now-playing { font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
-  .close-player {
-    background: none; border: 1px solid var(--border); border-radius: 8px;
-    padding: 6px 14px; color: var(--muted); font-size: 13px; cursor: pointer; font-family: inherit;
-  }
-  .close-player:hover { color: var(--text); }
-  .player-title { font-size: 18px; font-weight: 500; margin-bottom: 14px; }
+  .close-player { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; color: var(--muted); font-size: 13px; cursor: pointer; font-family: inherit; }
+  .player-title { font-size: 17px; font-weight: 500; margin-bottom: 12px; }
 
+  /* SES KONTROLÜ */
+  .volume-bar {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 16px; margin-bottom: 12px;
+  }
+  .mute-btn {
+    background: none; border: none; font-size: 20px; cursor: pointer;
+    padding: 0; line-height: 1; transition: transform 0.1s;
+  }
+  .mute-btn:active { transform: scale(0.85); }
+  .vol-slider {
+    flex: 1; accent-color: var(--accent); cursor: pointer;
+    height: 4px; border-radius: 2px;
+  }
+  .vol-num { font-size: 13px; color: var(--muted); width: 32px; text-align: right; }
+
+  /* VIDEO FRAME */
   .iframe-wrap {
     position: relative; padding-bottom: 56.25%;
     border-radius: 14px; overflow: hidden;
     background: #000; border: 1px solid var(--border);
+    margin-bottom: 24px;
   }
   #player { position: absolute; inset: 0; width: 100%; height: 100%; }
 
@@ -72,7 +82,6 @@
   }
   .tap-zone-left { left: 0; }
   .tap-zone-right { right: 0; }
-
   .seek-flash {
     position: absolute; top: 50%; transform: translateY(-50%);
     background: rgba(255,255,255,0.2); border-radius: 50%;
@@ -86,8 +95,9 @@
   .seek-flash.show { opacity: 1; }
   .seek-arrow { font-size: 22px; line-height: 1; }
 
-  .list-wrap { padding: 24px 32px; }
-  .list-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+  /* LIST */
+  .list-wrap { padding: 0 32px 32px; }
+  .list-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-top: 24px; }
   .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty-icon { font-size: 48px; margin-bottom: 12px; }
   .empty-text { font-size: 15px; line-height: 1.6; }
@@ -99,32 +109,25 @@
     border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all 0.2s;
   }
   .video-item:hover, .video-item.playing { border-color: var(--accent); background: #1e1010; }
-
   .video-thumb { width: 100px; height: 56px; border-radius: 8px; background: var(--surface); overflow: hidden; flex-shrink: 0; position: relative; }
   .video-thumb img { width: 100%; height: 100%; object-fit: cover; }
   .thumb-placeholder { width: 100%; height: 100%; display: none; align-items: center; justify-content: center; font-size: 20px; background: #1a1a1a; }
-  .play-overlay {
-    position: absolute; inset: 0; background: rgba(0,0,0,0.4);
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; transition: opacity 0.2s; border-radius: 8px; font-size: 20px;
-  }
+  .play-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; border-radius: 8px; font-size: 20px; }
   .video-item:hover .play-overlay { opacity: 1; }
-
   .video-info { flex: 1; min-width: 0; }
   .video-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .video-url { font-size: 11px; color: var(--muted); }
-
   .playing-badge { display: none; background: var(--accent); color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 50px; letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0; }
   .video-item.playing .playing-badge { display: block; }
-
   .delete-btn { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.2s; flex-shrink: 0; }
   .delete-btn:hover { color: var(--accent); }
 
   @media (max-width: 600px) {
     header { padding: 16px 20px; }
-    .add-bar { padding: 16px 20px; flex-wrap: wrap; }
+    .add-bar { padding: 16px 20px; }
     .title-input { width: 100%; }
-    .player-wrap, .list-wrap { padding: 16px 20px; }
+    .player-wrap { padding: 16px 20px 0; }
+    .list-wrap { padding: 0 20px 24px; }
     .video-thumb { width: 72px; height: 40px; }
   }
 </style>
@@ -148,161 +151,3 @@
     <div class="now-playing">▶ Şu An Oynatılıyor</div>
     <button class="close-player" onclick="closePlayer()">✕ Kapat</button>
   </div>
-  <div class="player-title" id="playerTitle"></div>
-  <div class="iframe-wrap">
-    <div class="tap-zone tap-zone-left" id="tapLeft"></div>
-    <div class="tap-zone tap-zone-right" id="tapRight"></div>
-    <div class="seek-flash left" id="flashLeft"><div class="seek-arrow">«</div><div>-10sn</div></div>
-    <div class="seek-flash right" id="flashRight"><div class="seek-arrow">»</div><div>+10sn</div></div>
-    <div id="player"></div>
-  </div>
-</div>
-
-<div class="list-wrap">
-  <div class="list-title">Video Listem</div>
-  <div id="emptyState" class="empty-state">
-    <div class="empty-icon">🎬</div>
-    <div class="empty-text">Henüz video yok.<br>YouTube'dan bir URL yapıştır ve ekle.</div>
-  </div>
-  <div class="video-list" id="videoList"></div>
-</div>
-
-<script src="https://www.youtube.com/iframe_api"></script>
-<script>
-let videos = JSON.parse(localStorage.getItem('temizyt_videos') || '[]');
-let currentIdx = -1;
-let ytPlayer = null;
-let ytReady = false;
-let pendingVideoId = null;
-
-window.onYouTubeIframeAPIReady = function() {
-  ytReady = true;
-  ytPlayer = new YT.Player('player', {
-    height: '100%',
-    width: '100%',
-    playerVars: { rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 1 },
-    events: {
-      onReady: function(e) {
-        if (pendingVideoId) {
-          e.target.loadVideoById(pendingVideoId);
-          pendingVideoId = null;
-        }
-      }
-    }
-  });
-};
-
-function extractVideoId(url) {
-  url = url.trim();
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
-  ];
-  for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
-  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
-  return null;
-}
-
-function addVideo() {
-  const url = document.getElementById('urlInput').value.trim();
-  const title = document.getElementById('titleInput').value.trim();
-  const err = document.getElementById('errorMsg');
-  const id = extractVideoId(url);
-  if (!id) { err.classList.add('show'); setTimeout(() => err.classList.remove('show'), 3000); return; }
-  err.classList.remove('show');
-  videos.push({ id, name: title || 'Video ' + (videos.length + 1), url });
-  save();
-  document.getElementById('urlInput').value = '';
-  document.getElementById('titleInput').value = '';
-  render();
-}
-
-function playVideo(idx) {
-  currentIdx = idx;
-  const v = videos[idx];
-  document.getElementById('playerTitle').textContent = v.name;
-  document.getElementById('playerWrap').classList.add('show');
-
-  if (ytPlayer && ytReady && typeof ytPlayer.loadVideoById === 'function') {
-    ytPlayer.loadVideoById(v.id);
-  } else {
-    pendingVideoId = v.id;
-  }
-
-  setTimeout(() => document.getElementById('playerWrap').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-  render();
-}
-
-function closePlayer() {
-  if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
-  document.getElementById('playerWrap').classList.remove('show');
-  currentIdx = -1;
-  render();
-}
-
-function deleteVideo(idx, e) {
-  e.stopPropagation();
-  if (currentIdx === idx) closePlayer();
-  videos.splice(idx, 1);
-  if (currentIdx > idx) currentIdx--;
-  save();
-  render();
-}
-
-function save() { localStorage.setItem('temizyt_videos', JSON.stringify(videos)); }
-
-function render() {
-  document.getElementById('countNum').textContent = videos.length;
-  const empty = document.getElementById('emptyState');
-  const list = document.getElementById('videoList');
-  if (videos.length === 0) { empty.style.display = 'block'; list.innerHTML = ''; return; }
-  empty.style.display = 'none';
-  list.innerHTML = videos.map((v, i) => `
-    <div class="video-item ${i === currentIdx ? 'playing' : ''}" onclick="playVideo(${i})">
-      <div class="video-thumb">
-        <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" alt="">
-        <div class="thumb-placeholder">▶</div>
-        <div class="play-overlay">▶</div>
-      </div>
-      <div class="video-info">
-        <div class="video-name">${v.name}</div>
-        <div class="video-url">youtu.be/${v.id}</div>
-      </div>
-      <div class="playing-badge">OYNATILIYOR</div>
-      <button class="delete-btn" onclick="deleteVideo(${i}, event)">×</button>
-    </div>
-  `).join('');
-}
-
-// ÇIFT DOKUNMA SEEK
-function seek(seconds, side) {
-  if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
-  try {
-    ytPlayer.seekTo(ytPlayer.getCurrentTime() + seconds, true);
-  } catch(e) {}
-  const flash = document.getElementById(side === 'left' ? 'flashLeft' : 'flashRight');
-  flash.classList.add('show');
-  setTimeout(() => flash.classList.remove('show'), 600);
-}
-
-function setupDoubleTap(el, seconds, side) {
-  let lastTap = 0;
-  el.addEventListener('touchend', function(e) {
-    e.preventDefault();
-    const now = Date.now();
-    if (now - lastTap < 300) seek(seconds, side);
-    lastTap = now;
-  });
-  el.addEventListener('dblclick', function(e) {
-    e.preventDefault();
-    seek(seconds, side);
-  });
-}
-
-setupDoubleTap(document.getElementById('tapLeft'), -10, 'left');
-setupDoubleTap(document.getElementById('tapRight'), 10, 'right');
-
-render();
-</script>
-</body>
-</html>
